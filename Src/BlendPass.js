@@ -10,10 +10,14 @@ import {
     UniformsUtils,
     WebGLRenderTarget
 } from "three";
-import { Pass } from "three/examples/jsm//postprocessing/Pass.js";
-import { BlendShader } from 'three/examples/jsm/shaders/BlendShader.js';
+import {
+    Pass
+} from "three/examples/jsm//postprocessing/Pass.js";
+import {
+    BlendShader
+} from 'three/examples/jsm/shaders/BlendShader.js';
 
-var BlendPass = function (selectedElem,scene,camera) {
+var BlendPass = function (selectedElem, scene, camera) {
     Pass.call(this);
     this.scene = scene;
     this.camera = camera;
@@ -34,7 +38,7 @@ var BlendPass = function (selectedElem,scene,camera) {
         console.error("Blendpass relies on blendshader");
 
     var blendshader = BlendShader;
-    this.uniforms = UniformsUtils.clone( blendshader.uniforms );
+    this.uniforms = UniformsUtils.clone(blendshader.uniforms);
     this.uniforms['tDiffuse1'].value = this.topRenderTarget.texture;
     this.uniforms['tDiffuse2'].value = this.bottomRenderTarget.texture;
 
@@ -44,7 +48,7 @@ var BlendPass = function (selectedElem,scene,camera) {
         fragmentShader: blendshader.fragmentShader,
     });
 
-    this.fsQuad = new Pass.FullScreenQuad( this.material );
+    this.fsQuad = new Pass.FullScreenQuad(this.material);
 
 };
 
@@ -53,41 +57,24 @@ BlendPass.prototype = Object.assign(Object.create(Pass.prototype), {
     constructor: BlendPass,
 
     render: function (renderer, writeBuffer) {
-        if ( this.renderToScreen ) {
-            this.fsQuad.material = this.materialBlend;
-            this.selectedElem.renderOrder = 999;
-            this.selectedElem.material.depthTest = false;
-            renderer.setRenderTarget(this.topRenderTarget);
-            if(!renderer.autoClear){
-                renderer.clear();
-            }
-            renderer.render(this.scene, this.camera);
-            renderer.setRenderTarget(null);
-            this.selectedElem.renderOrder = 0;
-            this.selectedElem.material.depthTest = true;
-            renderer.setRenderTarget(this.bottomRenderTarget);
-            if(!renderer.autoClear){
-                renderer.clear();
-            }
-            renderer.render(this.scene, this.camera);
-            renderer.setRenderTarget(null);
-			this.fsQuad.render( renderer );
-
-		} else {
-            this.fsQuad.material = this.materialBlend;
-            this.selectedElem.material.depthTest = false;
-            renderer.setRenderTarget(this.topRenderTarget);
+        this.fsQuad.material = this.materialBlend;
+        this.selectedElem.renderOrder = 999;
+        this.selectedElem.material.depthTest = false;
+        renderer.setRenderTarget(this.topRenderTarget);
+        if (!renderer.autoClear) {
             renderer.clear();
-            renderer.render(this.scene, this.camera);
-            renderer.setRenderTarget(null);
-            this.selectedElem.material.depthTest = true;
-            renderer.setRenderTarget(this.bottomRenderTarget);
+        }
+        renderer.render(this.scene, this.camera);
+        renderer.setRenderTarget(null);
+        this.selectedElem.renderOrder = 0;
+        this.selectedElem.material.depthTest = true;
+        renderer.setRenderTarget(this.bottomRenderTarget);
+        if (!renderer.autoClear) {
             renderer.clear();
-            renderer.render(this.scene, this.camera);
-            renderer.setRenderTarget(writeBuffer);
-            this.fsQuad.render( renderer );
-		}
-
+        }
+        renderer.render(this.scene, this.camera);
+        renderer.setRenderTarget(this.renderToScreen ? null : writeBuffer);
+        this.fsQuad.render(renderer);
     }
 
 });
