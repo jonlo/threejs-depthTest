@@ -58,39 +58,26 @@ function initScene() {
     const light = new THREE.DirectionalLight(0xffffff, 1, 100);
     scene.add(light);
 
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.MeshBasicMaterial({
-        color: 0x00ff00
-    });
-    var cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    var cubes = [];
+    const levels = 3;
+    for (let indexX = 0; indexX < levels; indexX++) {
+        for (let indexY = 0; indexY < levels; indexY++) {
+            for (let indexZ = 0; indexZ < levels; indexZ++) {
+                var geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+                var material = new THREE.MeshBasicMaterial({
+                    color: 0x00ff00
+                });
+                var cube = new THREE.Mesh(geometry, material);
+                cube.position.set(indexX+3, indexY +3 , indexZ+3);
+                cubes.push(cube);
+                scene.add(cube);
+            }
+        }
+    }
 
-    var geometry2 = new THREE.BoxGeometry(1, 1, 1);
-    var material2 = new THREE.MeshBasicMaterial({
-        color: 0x00ff00
-    });
-    var cube2 = new THREE.Mesh(geometry2, material2);
-    cube2.position.set(0, 0, 2);
-    scene.add(cube2);
 
-    var geometry3 = new THREE.BoxGeometry(1, 1, 1);
-    var material3 = new THREE.MeshBasicMaterial({
-        color: 0x00ff00
-    });
-    var cube3 = new THREE.Mesh(geometry3, material3);
-    cube3.position.set(2, 0, 2);
-    scene.add(cube3);
-
-    var geometry4 = new THREE.BoxGeometry(1, 1, 1);
-    var material4 = new THREE.MeshBasicMaterial({
-        color: 0xf00600
-    });
-    selectedCube = new THREE.Mesh(geometry4, material4);
-    selectedCube.position.set(2, 0, 0);
-    scene.add(selectedCube);
-
-    renderer.autoClear = false;
-
+    selectedCube = cubes[10];
+    selectedCube.material.color.set(0xff0000);
     window.addEventListener('resize', onWindowResize, false);
 
     composer = new EffectComposer(renderer);
@@ -104,14 +91,14 @@ function initScene() {
         magFilter: THREE.NearestFilter,
         format: THREE.RGBFormat
     });
-    
+
     var effect = new ShaderPass(BlendShader);
     effect.uniforms['tDiffuse1'].value = renderTarget.texture;
     effect.uniforms['tDiffuse2'].value = renderTarget2.texture;
 
     composer.addPass(effect);
     composer.setSize(window.innerWidth, window.innerHeight);
-   
+
 
 };
 
@@ -120,13 +107,14 @@ function render() {
     selectedCube.material.depthTest = false;
     renderer.setRenderTarget(renderTarget);
     renderer.render(scene, camera);
- //   renderer.clear();
+    //renderer.clear();
     selectedCube.renderOrder = 0;
     selectedCube.material.depthTest = true;
     renderer.setRenderTarget(renderTarget2);
     renderer.render(scene, camera);
+
     composer.render();
-    renderer.clear();
+    //renderer.clear();
 
 }
 // animate            
