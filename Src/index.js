@@ -63,7 +63,8 @@ function initScene() {
     window.addEventListener('resize', onWindowResize, false);
     composer = new EffectComposer(renderer);
 
-    var effect = new BlendPass(selectedCube,scene,camera);
+    var effect = new BlendPass(scene,camera);
+    effect.selectedElem = selectedCube;
     composer.addPass(effect);
     composer.setSize(window.innerWidth, window.innerHeight);
 
