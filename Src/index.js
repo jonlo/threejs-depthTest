@@ -1,20 +1,7 @@
 import * as THREE from 'three';
-import {
-    OrbitControls
-} from 'three/examples/jsm/controls/OrbitControls.js';
-
-import {
-    EffectComposer
-} from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import {
-    RenderPass
-} from 'three/examples/jsm/postprocessing/RenderPass.js';
-import {
-    ShaderPass
-} from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import {
-    BlendShader
-} from 'three/examples/jsm/shaders/BlendShader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import {BlendPass} from './BlendPass.js';
 
 var container,
     camera,
@@ -22,12 +9,8 @@ var container,
     renderer,
     selectedCube,
     controls,
-    quad;
+    composer;
 
-var composer;
-
-var renderTarget,
-    renderTarget2;
 'use strict';
 
 main();
@@ -68,54 +51,26 @@ function initScene() {
                     color: 0x00ff00
                 });
                 var cube = new THREE.Mesh(geometry, material);
-                cube.position.set(indexX+3, indexY +3 , indexZ+3);
+                cube.position.set(indexX + 3, indexY + 3, indexZ + 3);
                 cubes.push(cube);
                 scene.add(cube);
             }
         }
     }
 
-
     selectedCube = cubes[10];
     selectedCube.material.color.set(0xff0000);
     window.addEventListener('resize', onWindowResize, false);
-
     composer = new EffectComposer(renderer);
-    renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-        minFilter: THREE.LinearFilter,
-        magFilter: THREE.NearestFilter,
-        format: THREE.RGBFormat
-    });
-    renderTarget2 = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-        minFilter: THREE.LinearFilter,
-        magFilter: THREE.NearestFilter,
-        format: THREE.RGBFormat
-    });
 
-    var effect = new ShaderPass(BlendShader);
-    effect.uniforms['tDiffuse1'].value = renderTarget.texture;
-    effect.uniforms['tDiffuse2'].value = renderTarget2.texture;
-
+    var effect = new BlendPass(selectedCube,scene,camera);
     composer.addPass(effect);
     composer.setSize(window.innerWidth, window.innerHeight);
-
 
 };
 
 function render() {
-    selectedCube.renderOrder = 999;
-    selectedCube.material.depthTest = false;
-    renderer.setRenderTarget(renderTarget);
-    renderer.render(scene, camera);
-    //renderer.clear();
-    selectedCube.renderOrder = 0;
-    selectedCube.material.depthTest = true;
-    renderer.setRenderTarget(renderTarget2);
-    renderer.render(scene, camera);
-
     composer.render();
-    //renderer.clear();
-
 }
 // animate            
 (function animate() {
